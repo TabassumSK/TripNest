@@ -30,6 +30,9 @@ const LocalStrategy = require("passport-local");
 const session = require("express-session");
 const { isLoggedIn } = require("./middleware.js");
 
+//routes
+const listingRouter = require("./routes/listing.js");
+
 // ------------------- EJS (Template Engine) Settings ------------------- //
 
 // Set EJS as the default template engine
@@ -69,9 +72,11 @@ async function main() {
   await mongoose.connect(MONGO_URL);
 }
 
-app.get("/", (req, res) => {
-  res.send("working database");
-});
+app.use("/listings", listingRouter);
+
+// app.get("/", (req, res) => {
+//   res.send("working database");
+// });
 
 // ------------------- SESSION CONFIG -------------------
 // app.use(
@@ -145,83 +150,6 @@ app.get("/", (req, res) => {
 //     res.send("saved in database");
 // });
 
-//index listings route
-app.get(
-  "/listings",
-  wrapAsync(async (req, res) => {
-    const allListings = await Listing.find({});
-    res.render("listings/index", { allListings });
-  })
-);
-
-//show route
-app.get(
-  "/listings/:id",
-  wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    const listing = await Listing.findById(id).populate("reviews");
-    if (!listing) {
-      throw new ExpressError(404, "Listing not found");
-    }
-    res.render("listings/show", { listing });
-  })
-);
-
-//new listing route
-app.get("/listing/new", (req, res) => {
-  res.render("listings/new");
-});
-
-//create listing route
-app.post(
-  "/listings",
-  wrapAsync(async (req, res) => {
-    const newListing = new Listing(req.body.listing);
-    await newListing.save();
-    res.redirect("/listings");
-  })
-);
-
-//edit route
-app.get(
-  "/listings/:id/edit",
-  wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    const listing = await Listing.findById(id);
-    if (!listing) {
-      throw new ExpressError(404, "Listing not found");
-    }
-    res.render("listings/edit", { listing });
-  })
-);
-
-//update route
-app.put(
-  "/listings/:id",
-  wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    const listing = await Listing.findById(id);
-    if (!listing) {
-      throw new ExpressError(404, "Listing not found");
-    }
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-    res.redirect("/listings");
-  })
-);
-
-//delete route
-app.delete(
-  "/listings/:id",
-  wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    const listing = await Listing.findById(id);
-    if (!listing) {
-      throw new ExpressError(404, "Listing not found");
-    }
-    await Listing.findByIdAndDelete(id);
-    res.redirect("/listings");
-  })
-);
 
 //Reviews
 //Post review route

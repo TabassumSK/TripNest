@@ -1,0 +1,3 @@
+- [x] Edit routes/listing.js: Add imports for Listing and ExpressError, remove the duplicate router.get("/", ...) route.
+- [x] Edit app.js: Rename userRouter to listingRouter, change mount path to "/listings".
+- [ ] Test the routes by running the server and visiting /listings.
