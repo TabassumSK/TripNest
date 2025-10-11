@@ -32,6 +32,7 @@ const { isLoggedIn } = require("./middleware.js");
 
 //routes
 const listingRouter = require("./routes/listing.js");
+const reviewRouter = require("./routes/review.js");
 
 // ------------------- EJS (Template Engine) Settings ------------------- //
 
@@ -73,6 +74,7 @@ async function main() {
 }
 
 app.use("/listings", listingRouter);
+app.use("/listings/:id/reviews", reviewRouter);
 
 // app.get("/", (req, res) => {
 //   res.send("working database");
@@ -151,32 +153,6 @@ app.use("/listings", listingRouter);
 // });
 
 
-//Reviews
-//Post review route
-app.post("/listings/:id/reviews", async (req, res) => {
-  try {
-    let listing = await Listing.findById(req.params.id);
-    let newReview = new Review(req.body.review);
-    listing.reviews.push(newReview);
-    await newReview.save();
-    await listing.save();
-    res.redirect(`/listings/${listing.id}`);
-  } catch (err) {
-    console.error("Error creating review:", err);
-    res.status(500).send("Something went wrong while adding the review.");
-  }
-});
-
-//Delete review route
-app.delete(
-  "/listings/:id/reviews/:reviewId",
-  wrapAsync(async (req, res) => {
-    let { id, reviewId } = req.params;
-    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-    await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/listings/${id}`);
-  })
-);
 
 // if request matching above routes it will executed but if not find route then it will prints "Page Not Found"
 app.use((req, res, next) => {
