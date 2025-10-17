@@ -1,21 +1,23 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router({mergeParams: true});
 const wrapAsync = require("../utils/wrapAsync");
 const Listing = require("../models/listing");
 const Review = require("../models/reviews");
 const ExpressError = require("../utils/ExpressError");
 
-
 //Reviews
 //Post review route
-router.post("/", wrapAsync(async (req, res) => {
-  let listing = await Listing.findById(req.params.id);
-  let newReview = new Review(req.body.review);
-  await newReview.save();
-  listing.reviews.push(newReview._id);
-  await listing.save();
-  res.redirect(`/listings/${listing._id}`);
-}));
+router.post(
+  "/",
+  wrapAsync(async (req, res) => {
+    let listing = await Listing.findById(req.params.id);
+    let newReview = new Review(req.body.review);
+    await newReview.save();
+    listing.reviews.push(newReview._id);
+    await listing.save();
+    res.redirect(`/listings/${listing._id}`);
+  })
+);
 
 //Delete review route
 router.delete(
@@ -27,3 +29,5 @@ router.delete(
     res.redirect(`/listings/${id}`);
   })
 );
+
+module.exports = router;
