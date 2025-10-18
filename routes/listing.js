@@ -13,6 +13,11 @@ router.get(
   })
 );
 
+//new listing route
+router.get("/new", (req, res) => {
+  res.render("listings/new.ejs");
+});
+ 
 //show route
 router.get(
   "/:id",
@@ -25,11 +30,6 @@ router.get(
     res.render("listings/show", { listing });
   })
 );
-
-//new listing route
-router.get("/new", (req, res) => {
-  res.render("listings/new");
-});
 
 //create listing route
 router.post(
