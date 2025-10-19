@@ -22,6 +22,7 @@ const wrapAsync = require("./utils/wrapAsync");
 const ExpressError = require("./utils/ExpressError.js");
 // models/review.js
 const Review = require("./models/reviews.js");
+const cookieParser = require("cookie-parser");
 
 //user authenticaion-authorisation
 const User = require("./models/users.js");
@@ -58,6 +59,7 @@ app.use(methodOverride("_method"));
 // Use ejs-mate as the template engine for rendering .ejs files
 // This allows you to use   and partials in your templates
 app.engine("ejs", ejsMate);
+app.use(cookieParser());
 
 //mongoDB connection with js
 const MONGO_URL = "mongodb://127.0.0.1:27017/wonderlust";
@@ -72,6 +74,13 @@ main()
 async function main() {
   await mongoose.connect(MONGO_URL);
 }
+
+//cookies
+app.get("/cook", (req, res) => {
+  // res.cookie("sona", "scientist");
+  console.dir(req, cookies);
+  res.send("works");
+});
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
@@ -151,8 +160,6 @@ app.use("/listings/:id/reviews", reviewRouter);
 //     await list1.save();
 //     res.send("saved in database");
 // });
-
-
 
 // if request matching above routes it will executed but if not find route then it will prints "Page Not Found"
 app.use((req, res, next) => {
