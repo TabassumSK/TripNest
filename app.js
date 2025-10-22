@@ -22,13 +22,14 @@ const wrapAsync = require("./utils/wrapAsync");
 const ExpressError = require("./utils/ExpressError.js");
 // models/review.js
 const Review = require("./models/reviews.js");
+//learn about cookies
 const cookieParser = require("cookie-parser");
+const session = require("express-session");
 
 //user authenticaion-authorisation
 const User = require("./models/users.js");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-const session = require("express-session");
 const { isLoggedIn } = require("./middleware.js");
 
 //routes
@@ -59,7 +60,8 @@ app.use(methodOverride("_method"));
 // Use ejs-mate as the template engine for rendering .ejs files
 // This allows you to use   and partials in your templates
 app.engine("ejs", ejsMate);
-app.use(cookieParser());
+app.use(cookieParser("secretcode"));
+app.use(session({ secret: "superString" }));
 
 //mongoDB connection with js
 const MONGO_URL = "mongodb://127.0.0.1:27017/wonderlust";
@@ -77,9 +79,34 @@ async function main() {
 
 //cookies
 app.get("/cook", (req, res) => {
-  // res.cookie("sona", "scientist");
-  console.dir(req, cookies);
-  res.send("works");
+  res.cookie("sona", "scientist");
+  res.cookie("Car", "Toyota");
+  res.send("Cookies are sended");
+});
+
+app.get("/", (req, res) => {
+  console.dir(req.cookies);
+  res.send("Cookies are parsed");
+});
+
+app.get("/greet", (req, res) => {
+  let { name = "anonymous" } = req.cookies;
+  res.send(`Hi ${name} to visit`);
+});
+
+app.get("/signedCookies", (req, res) => {
+  res.cookie("made-in", "India", { signed: true });
+  res.send("Signed");
+});
+
+app.get("/verify", (req, res) => {
+  console.log(req.signedCookies);
+  res.send("verified");
+});
+
+//Express-Session
+app.get("/test", (req, res) => {
+  res.send("tested");
 });
 
 app.use("/listings", listingRouter);
