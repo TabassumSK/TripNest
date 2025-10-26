@@ -61,7 +61,9 @@ app.use(methodOverride("_method"));
 // This allows you to use   and partials in your templates
 app.engine("ejs", ejsMate);
 app.use(cookieParser("secretcode"));
-app.use(session({ secret: "superString" }));
+app.use(
+  session({ secret: "superString", resave: false, saveUninitialized: true })
+);
 
 //mongoDB connection with js
 const MONGO_URL = "mongodb://127.0.0.1:27017/wonderlust";
@@ -85,7 +87,7 @@ app.get("/cook", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  console.dir(req.cookies);
+  console.dir(req.cookies); //unsigned cookies
   res.send("Cookies are parsed");
 });
 
@@ -100,7 +102,7 @@ app.get("/signedCookies", (req, res) => {
 });
 
 app.get("/verify", (req, res) => {
-  console.log(req.signedCookies);
+  console.log(req.signedCookies); //signed cookies
   res.send("verified");
 });
 
@@ -108,6 +110,25 @@ app.get("/verify", (req, res) => {
 app.get("/test", (req, res) => {
   res.send("tested");
 });
+
+app.get("/reqcount", (req, res) => {
+  if(req.session.count) {
+    req.session.count++;
+  }
+  else {
+    req.session.count = 1;
+  }
+  res.send(`You sent a request ${req.session.count} times`);
+});
+
+app.get("/register", (req, res) => {
+  let {name = "anonymous"} = req.query;  // http://localhost:8080/register?name=Tabassum
+  req.session.name = name;
+  res.redirect("/hello");
+});
+app.get("/hello", (req, res) => {
+  res.send(`Hello, ${req.session.name}`);
+})
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
