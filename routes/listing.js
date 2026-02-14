@@ -1,85 +1,76 @@
 const express = require("express");
-const router = express.Router({ mergeParams: true });
+const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync");
 const Listing = require("../models/listing");
 const ExpressError = require("../utils/ExpressError");
+const { isLoggedIn, isOwner, validateListing } = require("../middleware.js");
+const listingControllers = require("../controllers/listings.js");
+const multer = require("multer");
+const { storage } = require("../cloudConfig.js");
+const upload = multer({ storage });
 
-//index listings route
-router.get(
-  "/",
-  wrapAsync(async (req, res) => {
-    const allListings = await Listing.find({});
-    res.render("listings/index", { allListings });
-  })
-);
+router
+  .route("/")
+  .get(wrapAsync(listingControllers.index))
+  .post(
+    isLoggedIn,
+    upload.single("listing[image]"),
+    validateListing,
+    wrapAsync(listingControllers.createListing),
+  );
 
 //new listing route
-router.get("/new", (req, res) => {
-  res.render("listings/new.ejs");
-});
- 
+router.get("/new", isLoggedIn, listingControllers.renderNewForm);
+
+router
+  .route("/:id")
+  .get(wrapAsync(listingControllers.showListing))
+  .put(
+    isLoggedIn,
+    isOwner,
+    upload.single("listing[image]"),
+    validateListing,
+    wrapAsync(listingControllers.updateListing),
+  )
+  .delete(isLoggedIn, isOwner, wrapAsync(listingControllers.destroyListing));
+
+//index listings route
+// router.get("/", wrapAsync(listingControllers.index));
+
 //show route
-router.get(
-  "/:id",
-  wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    const listing = await Listing.findById(id).populate("reviews");
-    if (!listing) {
-      throw new ExpressError(404, "Listing not found");
-    }
-    res.render("listings/show", { listing });
-  })
-);
+// router.get("/:id", wrapAsync(listingControllers.showListing));
 
 //create listing route
-router.post(
-  "/",
-  wrapAsync(async (req, res) => {
-    const newListing = new Listing(req.body.listing);
-    await newListing.save();
-    res.redirect("/listings");
-  })
-);
+// router.post(
+//   "/",
+//   isLoggedIn,
+//   validateListing,
+//   wrapAsync(listingControllers.createListing),
+// );
 
-//edit route
+// edit route
 router.get(
   "/:id/edit",
-  wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    const listing = await Listing.findById(id);
-    if (!listing) {
-      throw new ExpressError(404, "Listing not found");
-    }
-    res.render("listings/edit", { listing });
-  })
+  isLoggedIn,
+  isOwner,
+  wrapAsync(listingControllers.renderEditForm),
 );
 
 //update route
-router.put(
-  "/:id",
-  wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    const listing = await Listing.findById(id);
-    if (!listing) {
-      throw new ExpressError(404, "Listing not found");
-    }
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-    res.redirect("/listings");
-  })
-);
+// router.put(
+//   "/:id",
+//   isLoggedIn,
+//   isOwner,
+//   validateListing,
+//   wrapAsync(listingControllers.updateListing),
+// );
 
 //delete route
-router.delete(
-  "/:id",
-  wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    const listing = await Listing.findById(id);
-    if (!listing) {
-      throw new ExpressError(404, "Listing not found");
-    }
-    await Listing.findByIdAndDelete(id);
-    res.redirect("/listings");
-  })
-);
+// router.delete(
+//   "/:id",
+//   isLoggedIn,
+//   isOwner,
+//   wrapAsync(listingControllers.destroyListing),
+// );
 
 module.exports = router;

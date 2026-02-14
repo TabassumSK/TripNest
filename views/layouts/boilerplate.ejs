@@ -10,11 +10,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
     <title>StayHub</title>
+    <link href="/css/rating.css" rel="stylesheet">
 </head>
 <body>
     <%- include("../includes/navbar") %>
 
-    <div class="container"><%- body %></div>
+    <div class="container">
+      <%- include("../includes/flash") %>
+      <%- body %>
+    </div>
 
     <%- include("../includes/footer") %>
 
