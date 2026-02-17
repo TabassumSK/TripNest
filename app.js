@@ -92,6 +92,12 @@ async function main() {
   await mongoose.connect(MONGO_URL);
 }
 
+//map token
+app.use((req, res, next) => {
+  res.locals.MAP_TOKEN = process.env.MAP_TOKEN;
+  next();
+});
+
 // ------------------------ learn about cookies -------------------------------- \\
 // A cookie is a small piece of data stored in the user’s browser.
 const cookieParser = require("cookie-parser");
@@ -166,6 +172,7 @@ app.use((req, res, next) => {
   res.locals.currUser = req.user;
   next();
 });
+
 
 //user login
 // app.get("/users", async (req, res) => {

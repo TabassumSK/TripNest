@@ -2,6 +2,19 @@
 //model - database, view - frontend, controllers - backend
 
 const Listing = require("../models/listing.js");
+const axios = require("axios");
+
+// ✅ Helper function here
+async function getCoordinates(location) {
+  const response = await axios.get(
+    `https://api.maptiler.com/geocoding/${location}.json`,
+    {
+      params: { key: process.env.MAP_TOKEN }
+    }
+  );
+
+  return response.data.features[0].center;
+}
 
 //index listings
 module.exports.index = async (req, res) => {
@@ -37,9 +50,20 @@ module.exports.showListing = async (req, res) => {
 module.exports.createListing = async (req, res) => {
   let url = req.file.path;
   let filename = req.file.filename;
+
+  // Get coordinates from location
+  const coords = await getCoordinates(req.body.listing.location);
+
   const newListing = new Listing(req.body.listing);
   newListing.owner = req.user._id;
   newListing.image = { url, filename };
+
+   // Save geometry
+  newListing.geometry = {
+    type: "Point",
+    coordinates: coords
+  };
+
   await newListing.save();
   req.flash("success", "New Listing Created");
   res.redirect("/listings");

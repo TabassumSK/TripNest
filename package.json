@@ -10,6 +10,9 @@
   "author": "Tabassum Shaikh",
   "license": "ISC",
   "dependencies": {
+    "@maptiler/sdk": "^3.11.1",
+    "axios": "^1.13.5",
+    "cloudinary": "^1.41.3",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.4",
