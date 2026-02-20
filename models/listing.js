@@ -1,6 +1,7 @@
 const mongoose = require("mongoose"); //--> use to establish connec with mongoDB
 const Review = require("./reviews");
 const users = require("./users");
+const { required } = require("joi");
 const Schema = mongoose.Schema;
 
 const listingSchema = new Schema({
@@ -30,11 +31,17 @@ const listingSchema = new Schema({
     type: {
       type: String,
       enum: ["Point"],
+      required: true,
     },
     coordinates: {
       type: [Number],
+      required: true,
     },
   },
+  category: {
+    type: String,
+    enum: ["mountains, rooms, farms"],
+  }
 });
 
 //middleware    middleware function id inside .post()
